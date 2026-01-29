@@ -7,7 +7,7 @@ const ContactForm = () => {
   const [form, setForm] = useState({
     fullName: "",
     email: "",
-    mobile: "",
+    mobileNumber: "", // match backend
     city: "",
   });
 
@@ -16,11 +16,13 @@ const ContactForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      await submitContactForm(form);
+      await submitContactForm(form); // form now matches backend DTO
       toast.success("Submitted successfully!");
-      setForm({ fullName: "", email: "", mobile: "", city: "" });
-    } catch {
+      setForm({ fullName: "", email: "", mobileNumber: "", city: "" });
+    } catch (err) {
+      console.error("Submission failed:", err);
       toast.error("Submission failed");
     }
   };
@@ -32,18 +34,14 @@ const ContactForm = () => {
     >
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-12">
-          
-       
+
           <div className="text-white">
-            <h2 className="text-4xl font-bold mb-4">
-              Let’s Build Something Great
-            </h2>
+            <h2 className="text-4xl font-bold mb-4">Let’s Build Something Great</h2>
             <p className="text-lg mb-6 max-w-md">
               Get expert consultation for your next project.  
               We help businesses turn ideas into reality with
               design, technology, and strategy.
             </p>
-
             <ul className="space-y-2 text-base">
               <li>✔ Free project consultation</li>
               <li>✔ Expert team support</li>
@@ -59,7 +57,7 @@ const ContactForm = () => {
               </h3>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                {["fullName", "email", "mobile", "city"].map((field) => (
+                {["fullName", "email", "mobileNumber", "city"].map((field) => (
                   <input
                     key={field}
                     type={field === "email" ? "email" : "text"}
@@ -69,7 +67,7 @@ const ContactForm = () => {
                         ? "Full Name"
                         : field === "email"
                         ? "Enter Email Address"
-                        : field === "mobile"
+                        : field === "mobileNumber"
                         ? "Mobile Number"
                         : "Area, City"
                     }
@@ -81,7 +79,10 @@ const ContactForm = () => {
                   />
                 ))}
 
-                <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded font-medium transition">
+                <button
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded font-medium transition"
+                  type="submit"
+                >
                   Get Quick Quote
                 </button>
               </form>

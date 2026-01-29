@@ -9,7 +9,8 @@ const NewsletterForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await subscribeNewsletter({ email });
+
+      await subscribeNewsletter(email);
       toast.success("Subscribed!");
       setEmail("");
     } catch {
@@ -43,7 +44,7 @@ const NewsletterForm = () => {
           required
           className="px-4 py-3 rounded-l-md w-full outline-none"
         />
-        <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-r-md font-semibold">
+        <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-r-md font-semibold" type="submit">
           Subscribe
         </button>
       </form>

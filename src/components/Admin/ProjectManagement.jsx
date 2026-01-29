@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { getProjects, createProject, deleteProject, updateProject } from "../../api/projects";
+import {
+  getProjects,
+  createProject,
+  deleteProject,
+  updateProject,
+  getProjectByName,
+} from "../../api/projects";
 import { toast } from "react-toastify";
 
 const SectionWrapper = ({ title, children }) => (
@@ -11,20 +17,26 @@ const SectionWrapper = ({ title, children }) => (
 
 const ProjectManagement = () => {
   const [projects, setProjects] = useState([]);
-  const [form, setForm] = useState({ name: "", description: "", image: "" });
+  const [form, setForm] = useState({ name: "", description: "", imageUrl: "" });
   const [editId, setEditId] = useState(null);
+  const [search, setSearch] = useState("");
 
+  // Load all projects on mount
   useEffect(() => {
     fetchProjects();
   }, []);
 
   const fetchProjects = async () => {
-    const data = await getProjects();
-    setProjects(data.content);
+    try {
+      const data = await getProjects();
+      setProjects(data.content || []);
+    } catch (error) {
+      console.error("Failed to fetch projects:", error);
+      toast.error("Failed to load projects");
+    }
   };
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,10 +48,11 @@ const ProjectManagement = () => {
         await createProject(form);
         toast.success("Project added!");
       }
-      setForm({ name: "", description: "", image: "" });
+      setForm({ name: "", description: "", imageUrl: "" });
       setEditId(null);
       fetchProjects();
-    } catch {
+    } catch (error) {
+      console.error("Failed to submit project:", error);
       toast.error(editId ? "Failed to update project." : "Failed to add project.");
     }
   };
@@ -49,7 +62,8 @@ const ProjectManagement = () => {
       await deleteProject(id);
       toast.success("Project deleted!");
       fetchProjects();
-    } catch {
+    } catch (error) {
+      console.error("Failed to delete project:", error);
       toast.error("Failed to delete project.");
     }
   };
@@ -58,18 +72,41 @@ const ProjectManagement = () => {
     setForm({
       name: project.name,
       description: project.description,
-      image: project.image || "",
+      imageUrl: project.imageUrl || "",
     });
     setEditId(project.id);
   };
 
   const handleCancel = () => {
-    setForm({ name: "", description: "", image: "" });
+    setForm({ name: "", description: "", imageUrl: "" });
     setEditId(null);
+  };
+
+  const handleSearchChange = async (e) => {
+    const value = e.target.value;
+    setSearch(value);
+
+    if (!value.trim()) {
+      // Reload all projects if search is empty
+      fetchProjects();
+      return;
+    }
+
+    try {
+      const project = await getProjectByName(value.trim());
+      setProjects(project ? [project] : []);
+    } catch (error) {
+      setProjects([]);
+      console.error("Search failed:", error);
+    }
   };
 
   return (
     <SectionWrapper title="Project Management">
+      {/* Search */}
+      
+
+      {/* Form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md mb-6">
         <input
           name="name"
@@ -88,9 +125,9 @@ const ProjectManagement = () => {
           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
         />
         <input
-          name="image"
+          name="imageUrl"
           placeholder="Image URL"
-          value={form.image}
+          value={form.imageUrl}
           onChange={handleChange}
           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
         />
@@ -110,49 +147,52 @@ const ProjectManagement = () => {
               Cancel
             </button>
           )}
+        
         </div>
       </form>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200 divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-2 text-left text-gray-600 font-medium">Name</th>
-              <th className="px-4 py-2 text-left text-gray-600 font-medium">Description</th>
-              <th className="px-4 py-2 text-left text-gray-600 font-medium">Image</th>
-              <th className="px-4 py-2 text-left text-gray-600 font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {projects.map((p) => (
-              <tr key={p.id} className="hover:bg-gray-50">
-                <td className="px-4 py-2">{p.name}</td>
-                <td className="px-4 py-2">{p.description}</td>
-                <td className="px-4 py-2">
-                  <img
-                    src={p.image || "https://via.placeholder.com/50"}
-                    alt={p.name}
-                    className="h-12 w-12 rounded object-cover"
-                  />
-                </td>
-                <td className="px-4 py-2 flex gap-2">
-                  <button
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition duration-300"
-                    onClick={() => handleEdit(p)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition duration-300"
-                    onClick={() => handleDelete(p.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Slider */}
+        <input
+        type="text"
+        placeholder="Search by project name..."
+        value={search}
+        onChange={handleSearchChange}
+        className="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+
+      <div className="flex overflow-x-auto gap-4 py-4">
+        
+        {projects.length === 0 && (
+          <p className="text-gray-500">No projects found.</p>
+        )}
+        {projects.map((p) => (
+          <div
+            key={p.id}
+            className="flex-shrink-0 w-64 bg-gray-100 rounded-lg shadow p-4 flex flex-col items-center"
+          >
+            <img
+              src={p.imageUrl || "https://via.placeholder.com/150"}
+              alt={p.name}
+              className="h-40 w-full object-cover rounded mb-2"
+            />
+            <h3 className="font-semibold text-lg">{p.name}</h3>
+            <p className="text-gray-600 text-sm text-center mb-2">{p.description}</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleEdit(p)}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(p.id)}
+                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </SectionWrapper>
   );

@@ -21,3 +21,8 @@ export const updateClient = async (id, data) => {
   const res = await axios.put(`${BASE_URL}/update/${id}`, data);
   return res.data;
 };
+
+export const searchClientByName = async (name) => {
+  const res = await axios.get(`${BASE_URL}/by-name/${name}`);
+  return res.data;
+};

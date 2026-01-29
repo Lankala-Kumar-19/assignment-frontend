@@ -11,20 +11,34 @@ const SectionWrapper = ({ title, children }) => (
 
 const ClientManagement = () => {
   const [clients, setClients] = useState([]);
-  const [form, setForm] = useState({ name: "", designation: "", description: "", image: "" });
-  const [editId, setEditId] = useState(null); // track editing client id
+  const [filteredClients, setFilteredClients] = useState([]);
+  const [form, setForm] = useState({
+    name: "",
+    designation: "",
+    description: "",
+    imageUrl: ""
+  });
+  const [editId, setEditId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchClients();
   }, []);
 
   const fetchClients = async () => {
-    const data = await getClients();
-    setClients(data.content);
+    try {
+      const data = await getClients();
+      setClients(data.content || []);
+      setFilteredClients(data.content || []);
+    } catch (error) {
+      console.error("Failed to fetch clients:", error);
+      toast.error("Failed to load clients.");
+    }
   };
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,10 +50,11 @@ const ClientManagement = () => {
         await createClient(form);
         toast.success("Client added!");
       }
-      setForm({ name: "", designation: "", description: "", image: "" });
+      setForm({ name: "", designation: "", description: "", imageUrl: "" });
       setEditId(null);
       fetchClients();
-    } catch {
+    } catch (error) {
+      console.error("Error submitting client:", error);
       toast.error(editId ? "Failed to update client." : "Failed to add client.");
     }
   };
@@ -49,7 +64,8 @@ const ClientManagement = () => {
       await deleteClient(id);
       toast.success("Client deleted!");
       fetchClients();
-    } catch {
+    } catch (error) {
+      console.error("Error deleting client:", error);
       toast.error("Failed to delete client.");
     }
   };
@@ -59,18 +75,28 @@ const ClientManagement = () => {
       name: client.name,
       designation: client.designation,
       description: client.description,
-      image: client.image || "",
+      imageUrl: client.imageUrl || ""
     });
     setEditId(client.id);
   };
 
   const handleCancel = () => {
-    setForm({ name: "", designation: "", description: "", image: "" });
+    setForm({ name: "", designation: "", description: "", imageUrl: "" });
     setEditId(null);
+  };
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    const filtered = clients.filter((c) =>
+      c.name.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredClients(filtered);
   };
 
   return (
     <SectionWrapper title="Client Management">
+      {/* Form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md mb-6">
         <input
           name="name"
@@ -97,9 +123,9 @@ const ClientManagement = () => {
           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
         />
         <input
-          name="image"
+          name="imageUrl"
           placeholder="Image URL"
-          value={form.image}
+          value={form.imageUrl}
           onChange={handleChange}
           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
         />
@@ -122,48 +148,47 @@ const ClientManagement = () => {
         </div>
       </form>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200 divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-gray-600 font-medium">Name</th>
-              <th className="px-6 py-3 text-left text-gray-600 font-medium">Designation</th>
-              <th className="px-6 py-3 text-left text-gray-600 font-medium">Description</th>
-              <th className="px-6 py-3 text-left text-gray-600 font-medium">Image</th>
-              <th className="px-6 py-3 text-left text-gray-600 font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {clients.map((c) => (
-              <tr key={c.id} className="hover:bg-gray-50">
-                <td className="px-6 py-3">{c.name}</td>
-                <td className="px-6 py-3">{c.designation}</td>
-                <td className="px-6 py-3">{c.description}</td>
-                <td className="px-6 py-3">
-                  <img
-                    src={c.image || "https://via.placeholder.com/50"}
-                    alt={c.name}
-                    className="h-12 w-12 rounded object-cover"
-                  />
-                </td>
-                <td className="px-6 py-3 flex gap-2">
-                  <button
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition duration-300"
-                    onClick={() => handleEdit(c)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition duration-300"
-                    onClick={() => handleDelete(c.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Search */}
+      <input
+        type="text"
+        placeholder="Search by name..."
+        value={searchTerm}
+        onChange={handleSearch}
+        className="w-full max-w-md mb-4 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+
+      {/* Sliding Clients */}
+      <div className="flex space-x-4 overflow-x-auto scrollbar-hide py-2">
+        {filteredClients.length === 0 && <p className="text-gray-500">No clients found.</p>}
+        {filteredClients.map((c) => (
+          <div
+            key={c.id}
+            className="bg-white rounded-lg shadow p-4 flex-shrink-0 w-60"
+          >
+            <img
+              src={c.imageUrl || "https://via.placeholder.com/150"}
+              alt={c.name}
+              className="w-full h-32 object-cover rounded mb-2"
+            />
+            <h3 className="text-lg font-semibold">{c.name}</h3>
+            <h4 className="text-gray-500 text-sm">{c.designation}</h4>
+            <p className="text-gray-700 text-sm mt-1">{c.description}</p>
+            <div className="flex gap-2 mt-2">
+              <button
+                className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm flex-1"
+                onClick={() => handleEdit(c)}
+              >
+                Edit
+              </button>
+              <button
+                className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm flex-1"
+                onClick={() => handleDelete(c.id)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </SectionWrapper>
   );

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getContactForms } from "../../api/contactForms";
+import { getContactForms, deleteContactForm } from "../../api/contactForms";
+import { toast } from "react-toastify";
 
 const SectionWrapper = ({ title, children }) => (
   <section className="bg-white rounded-lg shadow p-6 mb-8">
@@ -16,33 +17,53 @@ const ContactSubmissions = () => {
   }, []);
 
   const fetchContacts = async () => {
-    const data = await getContactForms();
-    setContacts(data.content);
+    try {
+      const data = await getContactForms();
+      setContacts(data.content || []);
+    } catch (error) {
+      console.error("Failed to fetch contacts:", error);
+      toast.error("Failed to load contacts.");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteContactForm(id);
+      toast.success("Contact deleted!");
+      fetchContacts();
+    } catch (error) {
+      console.error("Failed to delete contact:", error);
+      toast.error("Failed to delete contact.");
+    }
   };
 
   return (
     <SectionWrapper title="Contact Form Submissions">
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200 divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-gray-600 font-medium">Full Name</th>
-              <th className="px-6 py-3 text-left text-gray-600 font-medium">Email</th>
-              <th className="px-6 py-3 text-left text-gray-600 font-medium">Mobile</th>
-              <th className="px-6 py-3 text-left text-gray-600 font-medium">City</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {contacts.map((c) => (
-              <tr key={c.id} className="hover:bg-gray-50">
-                <td className="px-6 py-3">{c.fullName}</td>
-                <td className="px-6 py-3">{c.email}</td>
-                <td className="px-6 py-3">{c.mobileNumber}</td>
-                <td className="px-6 py-3">{c.city}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="max-h-96 overflow-y-auto border border-gray-200 rounded shadow">
+        {contacts.length === 0 && (
+          <p className="p-4 text-gray-500">No submissions yet.</p>
+        )}
+        <ul className="divide-y divide-gray-200">
+          {contacts.map((c) => (
+            <li
+              key={c.id}
+              className="flex justify-between items-center px-4 py-3 hover:bg-gray-50"
+            >
+              <div>
+                <p className="text-gray-700 font-medium">{c.fullName}</p>
+                <p className="text-gray-500 text-sm">{c.email}</p>
+                <p className="text-gray-500 text-sm">{c.mobileNumber}</p>
+                <p className="text-gray-500 text-sm">{c.city}</p>
+              </div>
+              <button
+                onClick={() => handleDelete(c.id)}
+                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition duration-300"
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
     </SectionWrapper>
   );

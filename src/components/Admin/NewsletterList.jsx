@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getSubscribers } from "../../api/newsletters";
+import { getSubscribers, deleteSubscriber } from "../../api/newsletters";
+import { toast } from "react-toastify";
 
 const SectionWrapper = ({ title, children }) => (
   <section className="bg-white rounded-lg shadow p-6 mb-8">
@@ -16,27 +17,48 @@ const NewsletterList = () => {
   }, []);
 
   const fetchSubscribers = async () => {
-    const data = await getSubscribers();
-    setSubscribers(data.content);
+    try {
+      const data = await getSubscribers();
+      setSubscribers(data.content || []);
+    } catch (error) {
+      console.error("Failed to fetch subscribers:", error);
+      toast.error("Failed to load subscribers.");
+    }
+  };
+
+  const handleDelete = async (email) => {
+    try {
+      await deleteSubscriber(email);
+      toast.success(`${email} removed from subscribers!`);
+      fetchSubscribers();
+    } catch (error) {
+      console.error("Failed to delete subscriber:", error);
+      toast.error("Failed to delete subscriber.");
+    }
   };
 
   return (
     <SectionWrapper title="Newsletter Subscribers">
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200 divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-gray-600 font-medium">Email</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {subscribers.map((s, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="px-6 py-3">{s.email}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="max-h-96 overflow-y-auto border border-gray-200 rounded shadow">
+        {subscribers.length === 0 && (
+          <p className="p-4 text-gray-500">No subscribers yet.</p>
+        )}
+        <ul className="divide-y divide-gray-200">
+          {subscribers.map((s, index) => (
+            <li
+              key={index}
+              className="flex justify-between items-center px-4 py-3 hover:bg-gray-50"
+            >
+              <span className="text-gray-700">{s.email}</span>
+              <button
+                onClick={() => handleDelete(s.email)}
+                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition duration-300"
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
     </SectionWrapper>
   );
