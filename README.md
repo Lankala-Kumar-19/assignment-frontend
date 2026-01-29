@@ -1,70 +1,113 @@
-# Getting Started with Create React App
+# Company Portfolio / Admin Dashboard - React Project
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a **React-based frontend application** for a company portfolio website with an **Admin Dashboard** to manage projects, clients, contact form submissions, and newsletter subscribers. The application integrates with a backend REST API deployed on Render.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+### Landing Page
+- **Contact Form:** Users can submit contact requests.
+- **Projects Section:** Showcase company projects with images and descriptions.
+- **Clients Section:** Display client testimonials and logos.
+- **Newsletter Subscription:** Users can subscribe with their email.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Admin Panel
+- **Project Management:** Add, edit, and delete projects.
+- **Client Management:** Add, edit, and delete clients with image URLs.
+- **Contact Submissions:** View all submitted contact forms.
+- **Newsletter Subscribers:** View a list of newsletter subscribers.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Other Features
+- Responsive design using **Tailwind CSS**.
+- Notifications via **React Toastify** for success/error messages.
+- Horizontal scrolling for projects and clients sections.
+- Placeholder images for missing assets.
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Folder Structure
 
-### `npm run build`
+src/
+├─ api/ # Axios API calls
+│ ├─ clients.js
+│ ├─ contactForms.js
+│ ├─ newsletters.js
+│ └─ projects.js
+├─ assests/ # Static assets (images, SVGs)
+├─ components/ # React components
+│ ├─ Admin/
+│ │ ├─ ClientManagement.jsx
+│ │ ├─ ContactSubmissions.jsx
+│ │ ├─ NewsletterList.jsx
+│ │ └─ ProjectManagement.jsx
+│ ├─ Landing/
+│ │ ├─ ClientsSection.jsx
+│ │ ├─ ContactForm.jsx
+│ │ ├─ NewsletterForm.jsx
+│ │ └─ ProjectsSection.jsx
+├─ pages/
+│ ├─ AdminPage.jsx
+│ └─ LandingPage.jsx
+├─ App.jsx
+└─ index.js
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Tech Stack
 
-### `npm run eject`
+- **Frontend:** React, Tailwind CSS
+- **State Management:** React Hooks (`useState`, `useEffect`)
+- **HTTP Requests:** Axios
+- **Notifications:** React Toastify
+- **Backend:** REST API (hosted on Render)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Backend API Endpoints
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+The frontend interacts with these endpoints:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Clients
+- `GET /clients?page=&size=` → Fetch clients
+- `POST /clients` → Add a client
+- `PUT /clients/update/:id` → Update a client
+- `DELETE /clients/delete/by-id/:id` → Delete a client
 
-## Learn More
+### Projects
+- `GET /projects?page=&size=` → Fetch projects
+- `POST /projects` → Add a project
+- `PUT /projects/update/:id` → Update a project
+- `DELETE /projects/delete/:id` → Delete a project
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Contact Forms
+- `POST /contact-forms` → Submit a contact form
+- `GET /contact-forms?page=&size=` → Fetch contact submissions
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Newsletter
+- `POST /newsletters/subscribe` → Subscribe email
+- `GET /newsletters?page=&size=` → Get subscribers list
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-### Analyzing the Bundle Size
+## Installation
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+1. Clone the repository:
 
-### Making a Progressive Web App
+git clone https://github.com/assignment-frontend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+cd assignment-frontend
 
-### Advanced Configuration
+2. Install dependencies:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+npm install
 
-### Deployment
+3. Start the development server:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+npm start
 
-### `npm run build` fails to minify
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Open http://localhost:3000 in your browser.
+
