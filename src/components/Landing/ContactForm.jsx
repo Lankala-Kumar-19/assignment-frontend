@@ -29,7 +29,7 @@ const ContactForm = () => {
 
   return (
     <section
-      className="relative py-20 bg-cover bg-center"
+      className="relative min-h-screen bg-cover bg-center flex items-center"
       style={{ backgroundImage: `url(${contactBg})` }}
     >
       <div className="max-w-7xl mx-auto px-6">

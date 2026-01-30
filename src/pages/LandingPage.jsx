@@ -3,6 +3,8 @@ import ProjectsSection from "../components/Landing/ProjectsSection";
 import ClientsSection from "../components/Landing/ClientsSection";
 import ContactForm from "../components/Landing/ContactForm";
 import NewsletterForm from "../components/Landing/NewsletterForm";
+import AboutUsSection from "../components/Landing/AboutUsSection";
+
 // import "../assests/styles/landing.css";
 
 const LandingPage = () => {
@@ -13,6 +15,7 @@ const LandingPage = () => {
   </h1> */}
 
     <ContactForm />
+    <AboutUsSection />
   <ProjectsSection />
   <ClientsSection />
   
